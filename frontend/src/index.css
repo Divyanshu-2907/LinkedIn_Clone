@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-100 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-linkedin-500 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-linkedin-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-linkedin-500 border-2 border-linkedin-500 px-6 py-2.5 rounded-full font-semibold hover:bg-linkedin-50 transition-colors duration-200;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200;
+  }
+}
