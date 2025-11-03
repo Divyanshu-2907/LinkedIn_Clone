@@ -42,50 +42,22 @@ export default function Messaging() {
   // Common emojis
   const commonEmojis = ['😊', '😂', '❤️', '👍', '🎉', '🔥', '💡', '👏', '🚀', '✨', '💪', '🌟', '😍', '🤔', '👌', '🙌'];
 
-  // Fetch conversations with improved error handling
+  // Fetch conversations
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      console.log('Fetching conversations...');
       const response = await messagingAPI.getConversations();
+      setConversations(response.data || []);
       
-      // Log the response for debugging
-      console.log('Conversations API Response:', response);
-      
-      // Handle different response structures
-      let conversationsData = [];
-      if (Array.isArray(response.data)) {
-        conversationsData = response.data;
-      } else if (response.data && Array.isArray(response.data.conversations)) {
-        conversationsData = response.data.conversations;
-      } else if (response.data && Array.isArray(response.data.data)) {
-        conversationsData = response.data.data;
-      }
-      
-      console.log('Processed conversations:', conversationsData);
-      setConversations(conversationsData);
-      
-      // Update selected conversation if needed
       if (selectedConversation && !selectedConversation.isNew) {
-        const updatedConv = conversationsData.find(c => c._id === selectedConversation._id);
+        const updatedConv = response.data?.find(c => c._id === selectedConversation._id);
         if (updatedConv) {
           setSelectedConversation(updatedConv);
         }
       }
-      
-      return conversationsData;
     } catch (error) {
-      console.error('Error fetching conversations:', {
-        error,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      const errorMessage = error.response?.data?.message || 'Failed to load conversations';
-      toast.error(errorMessage);
-      
-      // Return empty array to prevent undefined errors
-      return [];
+      console.error('Error fetching conversations:', error);
+      toast.error('Failed to load conversations');
     } finally {
       setLoading(false);
     }
@@ -115,93 +87,53 @@ export default function Messaging() {
     setSending(true);
 
     try {
-      let tempMessageId = `temp-${Date.now()}`;
-      const tempMessage = {
-        _id: tempMessageId,
-        content,
-        sender: user._id,
-        status: 'sending',
-        createdAt: new Date().toISOString()
-      };
-
       if (selectedConversation.isNew) {
-        // For new conversations, first create the conversation
         const response = await messagingAPI.startNewConversation(
           selectedConversation.user._id,
           content
         );
         
-        if (!response.data || !response.data._id) {
-          throw new Error('Failed to create conversation');
-        }
-        
-        const newConv = {
-          ...response.data,
-          messages: [{
-            ...tempMessage,
-            status: 'sent'
-          }]
-        };
-        
-        // Update the conversation list
+        toast.success('Conversation started!');
         await fetchConversations();
         
-        // Set the new conversation as selected
-        setSelectedConversation(newConv);
-        toast.success('Conversation started!');
+        const newConv = response.data.conversation;
         setSelectedConversation({
           ...newConv,
           messages: response.data.messages || []
         });
       } else {
-        // Optimistic update
-        const updatedConv = {
-          ...selectedConversation,
-          messages: [
-            ...selectedConversation.messages,
-            tempMessage
-          ]
+        const tempId = 'temp-' + Date.now();
+        const tempMessage = {
+          _id: tempId,
+          content,
+          sender: user._id,
+          timestamp: new Date().toISOString(),
+          status: 'sending',
+          isTemp: true
         };
-        setSelectedConversation(updatedConv);
+
+        setSelectedConversation(prev => ({
+          ...prev,
+          messages: [...(prev.messages || []), tempMessage],
+          lastMessage: content,
+          timestamp: new Date().toISOString()
+        }));
+
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+
+        const response = await messagingAPI.sendMessage(selectedConversation._id, content);
         
-        try {
-          const response = await messagingAPI.sendMessage(
-            selectedConversation._id,
-            content
-          );
-          
-          // Replace the temp message with the actual one from the server
-          const updatedMessages = updatedConv.messages.map(msg => 
-            msg._id === tempMessageId 
-              ? { ...response.data, status: 'sent' }
-              : msg
-          );
-          
-          setSelectedConversation({
-            ...updatedConv,
-            messages: updatedMessages
-          });
-          
-          // Update the conversation list to show the latest message
-          await fetchConversations();
-          
-        } catch (error) {
-          console.error('Error sending message:', error);
-          toast.error('Failed to send message');
-          
-          // Update message status to failed
-          const updatedMessages = updatedConv.messages.map(msg => 
-            msg._id === tempMessageId 
-              ? { ...msg, status: 'failed' }
-              : msg
-          );
-          
-          setSelectedConversation({
-            ...updatedConv,
-            messages: updatedMessages
-          });
-        }
+        setSelectedConversation(prev => ({
+          ...prev,
+          messages: prev.messages.map(msg => 
+            msg._id === tempId ? { ...response.data, status: 'sent' } : msg
+          )
+        }));
       }
+      
+      await fetchConversations();
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -238,38 +170,12 @@ export default function Messaging() {
     }
 
     try {
-      console.log('Searching users with query:', query);
       const response = await messagingAPI.searchUsers(query);
-      
-      // Log the full response for debugging
-      console.log('Search users response:', response);
-      
-      // Handle different response structures
-      let users = [];
-      if (Array.isArray(response.data)) {
-        users = response.data;
-      } else if (response.data && Array.isArray(response.data.users)) {
-        users = response.data.users;
-      } else if (response.data && Array.isArray(response.data.data)) {
-        users = response.data.data;
-      } else if (response.data) {
-        // If it's a single user object, wrap it in an array
-        users = [response.data];
-      }
-      
-      console.log('Processed search results:', users);
-      setSearchResults(users);
+      setSearchResults(response.data || []);
       setShowSearchResults(true);
     } catch (error) {
-      console.error('Error searching users:', {
-        error,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      const errorMessage = error.response?.data?.message || 'Failed to search users';
-      toast.error(errorMessage);
-      setSearchResults([]);
+      console.error('Error searching users:', error);
+      toast.error('Failed to search users');
     }
   };
 
@@ -297,31 +203,17 @@ export default function Messaging() {
   const handleSelectConversation = async (conversation) => {
     setSelectedConversation(conversation);
     
-    // Mark conversation as read
-    const markAsRead = async (conversationId) => {
+    if (conversation.unreadCount > 0) {
       try {
-        await messagingAPI.markAsRead(conversationId);
+        await messagingAPI.markAsRead(conversation._id);
         setConversations(prev => 
-          prev.map(conv => 
-            conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
+          prev.map(c => 
+            c._id === conversation._id ? { ...c, unreadCount: 0 } : c
           )
         );
-        
-        // Also update the selected conversation if it's the current one
-        if (selectedConversation?._id === conversationId) {
-          setSelectedConversation(prev => ({
-            ...prev,
-            unreadCount: 0
-          }));
-        }
       } catch (error) {
         console.error('Error marking as read:', error);
-        toast.error('Failed to mark conversation as read');
       }
-    };
-    
-    if (conversation.unreadCount > 0) {
-      markAsRead(conversation._id);
     }
   };
 
@@ -392,37 +284,11 @@ export default function Messaging() {
     }
   };
 
-  // Initial data fetch with error handling
+  // Initial data fetch
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadInitialData = async () => {
-      try {
-        if (isMounted) {
-          await fetchConversations();
-        }
-      } catch (error) {
-        console.error('Error in initial data load:', error);
-        if (isMounted) {
-          toast.error('Failed to load initial data');
-        }
-      }
-    };
-    
-    loadInitialData();
-    
-    // Set up polling for new messages with error handling
-    const interval = setInterval(() => {
-      fetchConversations().catch(error => {
-        console.error('Error in polling:', error);
-      });
-    }, 30000);
-    
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
+    fetchConversations();
+    const interval = setInterval(fetchConversations, 30000);
+    return () => clearInterval(interval);
   }, []);
   
   // Fetch messages when a conversation is selected
@@ -446,154 +312,6 @@ export default function Messaging() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto h-[calc(100vh-64px)] flex">
-        {/* New Chat Modal */}
-        {showNewChatModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl w-full max-w-md max-h-[80vh] flex flex-col">
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">New Message</h3>
-                <button 
-                  onClick={() => {
-                    setShowNewChatModal(false);
-                    setSearchTerm('');
-                    setSearchResults([]);
-                    setShowSearchResults(false);
-                  }}
-                  className="text-gray-400 hover:text-gray-500"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-              
-              <div className="p-4 border-b border-gray-200">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search for people..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent"
-                    value={searchTerm}
-                    onChange={async (e) => {
-                      const query = e.target.value;
-                      setSearchTerm(query);
-                      
-                      if (query.length >= 2) {
-                        await handleSearchUsers(query);
-                      } else {
-                        setSearchResults([]);
-                        setShowSearchResults(false);
-                      }
-                    }}
-                    autoFocus
-                  />
-                </div>
-                
-                {/* Search results dropdown */}
-                {showSearchResults && searchResults.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full max-w-md bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm max-h-60 overflow-auto">
-                    {searchResults.map((user) => (
-                      <button
-                        key={user._id}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center"
-                        onClick={() => startNewConversation(user)}
-                      >
-                        <img
-                          src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=40&background=0077b5&color=fff`}
-                          alt={user.name}
-                          className="h-10 w-10 rounded-full mr-3"
-                        />
-                        <div>
-                          <p className="font-medium text-gray-900">{user.name}</p>
-                          <p className="text-sm text-gray-500">{user.email || user.title || 'No additional info'}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                
-                {showSearchResults && searchResults.length === 0 && searchTerm.length >= 2 && (
-                  <div className="text-center py-4 text-gray-500">
-                    No users found matching "{searchTerm}"
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                {loading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-linkedin-500 mx-auto mb-3"></div>
-                      <p className="text-sm text-gray-600">Loading conversations...</p>
-                    </div>
-                  </div>
-                ) : filteredConversations.length > 0 ? (
-                  <ul className="divide-y divide-gray-100">
-                    {filteredConversations.map((conversation) => (
-                      <li 
-                        key={conversation._id}
-                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                          selectedConversation?._id === conversation._id ? 'bg-linkedin-50 border-l-4 border-linkedin-500' : ''
-                        }`}
-                        onClick={() => handleSelectConversation(conversation)}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className="flex-shrink-0 relative">
-                            <img
-                              className="h-12 w-12 rounded-full border-2 border-gray-200"
-                              src={conversation.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(conversation.user?.name)}&size=48&background=0077b5&color=fff`}
-                              alt={conversation.user?.name}
-                            />
-                            {conversation.user?.status === 'online' && (
-                              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-white"></span>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-semibold text-gray-900 truncate">
-                                {conversation.user?.name}
-                              </p>
-                              <p className="text-xs text-gray-500 flex-shrink-0 ml-2">
-                                {formatTimestamp(conversation.timestamp)}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <p className={`text-sm truncate ${conversation.unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
-                                {conversation.lastMessage || 'No messages yet'}
-                              </p>
-                              {conversation.unreadCount > 0 && (
-                                <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-linkedin-500 text-white text-xs font-semibold flex-shrink-0 ml-2">
-                                  {conversation.unreadCount}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                    <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {searchTerm ? 'No conversations found' : 'No messages yet'}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {searchTerm ? 'Try a different search term' : 'Start a conversation to begin messaging'}
-                    </p>
-                    <button
-                      onClick={() => setShowNewChatModal(true)}
-                      className="px-4 py-2 bg-linkedin-500 text-white rounded-lg hover:bg-linkedin-600 transition-colors font-medium"
-                    >
-                      Start New Chat
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-        
         {/* Sidebar */}
         <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 border-r border-gray-200 bg-white`}>
           <div className="p-4 border-b border-gray-200">

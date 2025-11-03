@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Users, UserPlus, UserMinus, MessageSquare, Search, X, Check, Clock } from 'lucide-react';
 import { usersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import toast from 'react-hot-toast';
 
 export default function Network() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [connections, setConnections] = useState([]);
@@ -141,17 +143,14 @@ export default function Network() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Network</h1>
-          <p className="text-gray-600">Manage your connections and grow your professional network</p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <div className="relative">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className={`rounded-xl shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white'}`}>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+            <h1 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 md:mb-0`}>My Network</h1>
+            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Manage your connections and grow your professional network</p>
+          </div>
+          <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               type="text"
@@ -175,22 +174,27 @@ export default function Network() {
 
           {/* Search Results */}
           {searchResults.length > 0 && (
-            <div className="mt-4 border-t border-gray-200 pt-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Search Results</h3>
+            <div className={`mt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-4`}>
+              <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-3`}>Search Results</h3>
               <div className="space-y-2">
                 {searchResults.map((searchUser) => (
-                  <div key={searchUser._id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div key={searchUser._id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
                     <div className="flex items-center space-x-3">
                       <img
                         src={searchUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(searchUser.name)}&size=40&background=0077b5&color=fff`}
                         alt={searchUser.name}
-                        className="w-12 h-12 rounded-full border-2 border-gray-200"
+                        className={`w-12 h-12 rounded-full border-2 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}
                       />
                       <div>
-                        <Link to={`/profile/${searchUser._id}`} className="font-medium text-gray-900 hover:text-linkedin-500">
+                        <Link 
+                          to={`/profile/${searchUser._id}`} 
+                          className={`font-medium ${theme === 'dark' ? 'text-white hover:text-linkedin-400' : 'text-gray-900 hover:text-linkedin-500'}`}
+                        >
                           {searchUser.name}
                         </Link>
-                        <p className="text-sm text-gray-600">{searchUser.email}</p>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {searchUser.email}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -208,15 +212,15 @@ export default function Network() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-          <div className="border-b border-gray-200">
+        <div className={`rounded-xl shadow-sm overflow-hidden mb-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+          <div className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab('suggestions')}
                 className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'suggestions'
-                    ? 'border-linkedin-500 text-linkedin-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-linkedin-500 text-linkedin-600 dark:text-linkedin-400'
+                    : `border-transparent ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -229,8 +233,8 @@ export default function Network() {
                 onClick={() => setActiveTab('connections')}
                 className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'connections'
-                    ? 'border-linkedin-500 text-linkedin-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-linkedin-500 text-linkedin-600 dark:text-linkedin-400'
+                    : `border-transparent ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -243,8 +247,8 @@ export default function Network() {
                 onClick={() => setActiveTab('pending')}
                 className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'pending'
-                    ? 'border-linkedin-500 text-linkedin-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-linkedin-500 text-linkedin-600 dark:text-linkedin-400'
+                    : `border-transparent ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
