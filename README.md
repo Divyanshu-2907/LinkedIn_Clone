@@ -344,7 +344,7 @@ Created with ❤️ as a demonstration of full-stack development skills.
 
 ## 📞 Support
 
-For support, email your-email@example.com or open an issue in the repository.
+For support, email dk5506934@gmail.com or open an issue in the repository.
 
 ---
 
