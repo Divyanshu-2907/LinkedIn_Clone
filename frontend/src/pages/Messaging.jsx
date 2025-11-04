@@ -13,7 +13,7 @@ import {
   AlertCircle,
   X,
   Plus,
-  Image as ImageIcon,
+  Image,
   File,
   Mic
 } from 'lucide-react';
@@ -39,7 +39,6 @@ export default function Messaging() {
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Common emojis
   const commonEmojis = ['😊', '😂', '❤️', '👍', '🎉', '🔥', '💡', '👏', '🚀', '✨', '💪', '🌟', '😍', '🤔', '👌', '🙌'];
 
   // Fetch conversations
@@ -310,30 +309,30 @@ export default function Messaging() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto h-[calc(100vh-64px)] flex">
         {/* Sidebar */}
-        <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 border-r border-gray-200 bg-white`}>
-          <div className="p-4 border-b border-gray-200">
+        <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800`}>
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Messages</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Messages</h2>
               <button 
                 onClick={() => setShowNewChatModal(true)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 title="New conversation"
               >
-                <Plus className="h-5 w-5 text-gray-600" />
+                <Plus className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
             
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
                 placeholder="Search conversations..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -345,41 +344,41 @@ export default function Messaging() {
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-linkedin-500 mx-auto mb-3"></div>
-                  <p className="text-sm text-gray-600">Loading conversations...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Loading conversations...</p>
                 </div>
               </div>
             ) : filteredConversations.length > 0 ? (
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-gray-100 dark:divide-gray-700">
                 {filteredConversations.map((conversation) => (
                   <li 
                     key={conversation._id}
-                    className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      selectedConversation?._id === conversation._id ? 'bg-linkedin-50 border-l-4 border-linkedin-500' : ''
+                    className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
+                      selectedConversation?._id === conversation._id ? 'bg-linkedin-50 dark:bg-linkedin-900/20 border-l-4 border-linkedin-500' : ''
                     }`}
                     onClick={() => handleSelectConversation(conversation)}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 relative">
                         <img
-                          className="h-12 w-12 rounded-full border-2 border-gray-200"
+                          className="h-12 w-12 rounded-full border-2 border-gray-200 dark:border-gray-600"
                           src={conversation.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(conversation.user?.name)}&size=48&background=0077b5&color=fff`}
                           alt={conversation.user?.name}
                         />
                         {conversation.user?.status === 'online' && (
-                          <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-white"></span>
+                          <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-white dark:border-gray-800"></span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                             {conversation.user?.name}
                           </p>
-                          <p className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
                             {formatTimestamp(conversation.timestamp)}
                           </p>
                         </div>
                         <div className="flex items-center justify-between">
-                          <p className={`text-sm truncate ${conversation.unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                          <p className={`text-sm truncate ${conversation.unreadCount > 0 ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400'}`}>
                             {conversation.lastMessage || 'No messages yet'}
                           </p>
                           {conversation.unreadCount > 0 && (
@@ -395,11 +394,11 @@ export default function Messaging() {
               </ul>
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <MessageSquare className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   {searchTerm ? 'No conversations found' : 'No messages yet'}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
                   {searchTerm ? 'Try a different search term' : 'Start a conversation to begin messaging'}
                 </p>
                 <button
@@ -413,32 +412,32 @@ export default function Messaging() {
           </div>
         </div>
 
-        {/* Chat Area - continued in next message due to length */}
+        {/* Chat Area */}
         {selectedConversation ? (
-          <div className="flex-1 flex flex-col bg-white">
-            <div className="p-4 border-b border-gray-200 flex items-center bg-white shadow-sm">
+          <div className="flex-1 flex flex-col bg-white dark:bg-gray-800">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center bg-white dark:bg-gray-800 shadow-sm">
               <button 
-                className="md:hidden mr-3 p-2 rounded-lg hover:bg-gray-100"
+                className="md:hidden mr-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 onClick={() => setSelectedConversation(null)}
               >
-                <ChevronLeft className="h-5 w-5 text-gray-600" />
+                <ChevronLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
               <div className="flex items-center space-x-3 flex-1">
                 <div className="relative">
                   <img
-                    className="h-10 w-10 rounded-full border-2 border-gray-200"
+                    className="h-10 w-10 rounded-full border-2 border-gray-200 dark:border-gray-600"
                     src={selectedConversation.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedConversation.user?.name)}&size=40&background=0077b5&color=fff`}
                     alt={selectedConversation.user?.name}
                   />
                   {selectedConversation.user?.status === 'online' && (
-                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
+                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800"></span>
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold text-gray-900">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                     {selectedConversation.user?.name}
                   </h3>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     {selectedConversation.user?.status === 'online' 
                       ? 'Active now' 
                       : selectedConversation.user?.lastSeen 
@@ -447,17 +446,17 @@ export default function Messaging() {
                   </p>
                 </div>
               </div>
-              <button className="p-2 rounded-lg hover:bg-gray-100">
-                <MoreVertical className="h-5 w-5 text-gray-600" />
+              <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
 
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+            <div className="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
               {selectedConversation.messages?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages yet</h3>
-                  <p className="text-gray-600">Send a message to start the conversation</p>
+                  <MessageSquare className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No messages yet</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Send a message to start the conversation</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -492,17 +491,17 @@ export default function Messaging() {
                             className={`px-4 py-2.5 rounded-2xl ${
                               isMyMessage
                                 ? 'bg-linkedin-500 text-white rounded-br-sm'
-                                : 'bg-white text-gray-900 rounded-bl-sm shadow-sm'
+                                : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm shadow-sm'
                             }`}
                           >
                             <p className="text-sm break-words">{msg.content || msg.text}</p>
                           </div>
                           <div className={`flex items-center space-x-1 mt-1 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {formatMessageTime(msg.timestamp || msg.createdAt)}
                             </p>
                             {isMyMessage && (
-                              <span className="text-gray-500">
+                              <span className="text-gray-500 dark:text-gray-400">
                                 {getMessageStatusIcon(msg.status)}
                               </span>
                             )}
@@ -516,32 +515,32 @@ export default function Messaging() {
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <form onSubmit={handleSendMessage} className="flex items-end space-x-2">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <div className="flex items-end space-x-2">
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowAttachMenu(!showAttachMenu)}
-                    className="p-2.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                    className="p-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     title="Attach file"
                   >
                     <Paperclip className="h-5 w-5" />
                   </button>
 
                   {showAttachMenu && (
-                    <div className="absolute bottom-full left-0 mb-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10">
+                    <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 py-2 z-10">
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 text-gray-700"
+                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
                       >
-                        <ImageIcon size={18} />
+                        <Image size={18} />
                         <span className="text-sm">Photo</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => toast('Document feature coming soon!')}
-                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 text-gray-700"
+                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
                       >
                         <File size={18} />
                         <span className="text-sm">Document</span>
@@ -549,7 +548,7 @@ export default function Messaging() {
                       <button
                         type="button"
                         onClick={() => toast('Voice message feature coming soon!')}
-                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 text-gray-700"
+                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
                       >
                         <Mic size={18} />
                         <span className="text-sm">Voice</span>
@@ -570,11 +569,17 @@ export default function Messaging() {
                   <input
                     type="text"
                     placeholder="Type a message..."
-                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent"
                     value={message}
                     onChange={(e) => {
                       setMessage(e.target.value);
                       handleTyping();
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage(e);
+                      }
                     }}
                     disabled={sending}
                   />
@@ -582,19 +587,19 @@ export default function Messaging() {
                   <button
                     type="button"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
                   >
                     <Smile className="h-5 w-5" />
                   </button>
 
                   {showEmojiPicker && (
-                    <div className="absolute bottom-full right-0 mb-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-10">
+                    <div className="absolute bottom-full right-0 mb-2 w-72 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 z-10">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-gray-700">Quick Emojis</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Emojis</span>
                         <button
                           type="button"
                           onClick={() => setShowEmojiPicker(false)}
-                          className="text-gray-500 hover:text-gray-700"
+                          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                         >
                           <X size={16} />
                         </button>
@@ -605,7 +610,7 @@ export default function Messaging() {
                             key={index}
                             type="button"
                             onClick={() => insertEmoji(emoji)}
-                            className="text-2xl hover:bg-gray-100 p-2 rounded transition-colors"
+                            className="text-2xl hover:bg-gray-100 dark:hover:bg-gray-600 p-2 rounded transition-colors"
                           >
                             {emoji}
                           </button>
@@ -616,23 +621,24 @@ export default function Messaging() {
                 </div>
 
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSendMessage}
                   disabled={!message.trim() || sending}
                   className="p-2.5 rounded-lg text-white bg-linkedin-500 hover:bg-linkedin-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95"
                 >
                   <Send className="h-5 w-5" />
                 </button>
-              </form>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
+          <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900">
             <div className="text-center p-8 max-w-md">
-              <div className="w-20 h-20 bg-linkedin-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MessageSquare className="h-10 w-10 text-linkedin-500" />
+              <div className="w-20 h-20 bg-linkedin-100 dark:bg-linkedin-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MessageSquare className="h-10 w-10 text-linkedin-500 dark:text-linkedin-400" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Your Messages</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your Messages</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Select a conversation from the sidebar to start messaging, or create a new conversation to connect with someone.
               </p>
               <button
@@ -649,27 +655,27 @@ export default function Messaging() {
       {/* New Chat Modal */}
       {showNewChatModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">New Conversation</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">New Conversation</h3>
                 <button
                   onClick={() => {
                     setShowNewChatModal(false);
                     setSearchResults([]);
                   }}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   <X size={24} />
                 </button>
               </div>
               
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-5 w-5" />
                 <input
                   type="text"
                   placeholder="Search people..."
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-linkedin-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   onChange={(e) => handleSearchUsers(e.target.value)}
                   autoFocus
                 />
@@ -683,24 +689,24 @@ export default function Messaging() {
                     <button
                       key={searchUser._id}
                       onClick={() => startNewConversation(searchUser)}
-                      className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     >
                       <img
-                        src={searchUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(searchUser.name)}&size=48&background=0077b5&color=fff`}
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(searchUser.name)}&size=48&background=0077b5&color=fff`}
                         alt={searchUser.name}
-                        className="h-12 w-12 rounded-full border-2 border-gray-200"
+                        className="h-12 w-12 rounded-full border-2 border-gray-200 dark:border-gray-600"
                       />
                       <div className="flex-1 text-left">
-                        <p className="font-semibold text-gray-900">{searchUser.name}</p>
-                        <p className="text-sm text-gray-600">{searchUser.email}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{searchUser.name}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{searchUser.email}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Search className="h-16 w-16 text-gray-300 mb-4" />
-                  <p className="text-gray-600">
+                  <Search className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
                     Search for people to start a conversation
                   </p>
                 </div>
